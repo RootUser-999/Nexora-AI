@@ -5,12 +5,11 @@ import {
   DollarSign,
   ShoppingCart,
   Users,
-  PieChart as PieIcon,
   Filter,
   Download,
   Calendar,
   Layers
-} from 'recharts';
+} from 'lucide-react';
 import {
   ResponsiveContainer,
   AreaChart,

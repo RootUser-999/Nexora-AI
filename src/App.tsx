@@ -2,6 +2,7 @@ import React from 'react';
 import { AppProvider, useApp } from './context/AppContext.tsx';
 import { AppShell } from './components/AppShell.tsx';
 import { CommandPalette } from './components/CommandPalette.tsx';
+import { AuthModal } from './components/AuthModal.tsx';
 import { LandingPage } from './pages/LandingPage.tsx';
 import { DashboardPage } from './pages/DashboardPage.tsx';
 import { AIAssistantPage } from './pages/AIAssistantPage.tsx';
@@ -19,13 +20,18 @@ import { SettingsPage } from './pages/SettingsPage.tsx';
 import { DocsPage } from './pages/DocsPage.tsx';
 
 function MainRouter() {
-  const { currentView } = useApp();
+  const { currentView, isAuthModalOpen, setIsAuthModalOpen, authModalMode } = useApp();
 
   if (currentView === 'landing') {
     return (
       <>
         <LandingPage />
         <CommandPalette />
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          initialMode={authModalMode}
+        />
       </>
     );
   }
@@ -71,6 +77,11 @@ function MainRouter() {
         {renderActiveView()}
       </AppShell>
       <CommandPalette />
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode={authModalMode}
+      />
     </>
   );
 }

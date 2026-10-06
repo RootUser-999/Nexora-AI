@@ -19,10 +19,20 @@ function getGeminiClient(): GoogleGenAI | null {
 
 export async function askBusinessAssistant(
   prompt: string,
-  businessId: string = "biz_nexora_labs"
+  businessId: string
 ) {
   const structuredData = getStructuredBusinessContext(businessId);
   const ai = getGeminiClient();
+
+  // If the account has no records yet, provide real onboarding guidance
+  const hasData = structuredData.totalLifetimeOrders > 0 || structuredData.totalCatalogSize > 0 || structuredData.metrics.totalCustomers > 0;
+
+  if (!hasData) {
+    return {
+      content: `### Business Intelligence Notice\n\n**${structuredData.businessName}** does not have enough transaction activity recorded yet for a financial or operational analysis.\n\nTo unlock automated performance insights, revenue tracking, and inventory alerts:\n* **Create products** in your Product Catalog\n* **Add customers** to your CRM directory\n* **Record your first orders & invoices**\n\nOnce live records exist in your workspace, I will deliver strategic recommendations grounded in your actual numbers.`,
+      source: "nexora-engine",
+    };
+  }
 
   const systemInstruction = `You are Nexora AI, the executive AI Business Management Assistant for ${
     structuredData.businessName
@@ -31,30 +41,21 @@ You possess full verified analytical context of the business database:
 - 30-Day Revenue: $${structuredData.metrics.totalRevenue.toLocaleString()} (${
     structuredData.metrics.revenueChangePercent >= 0 ? "+" : ""
   }${structuredData.metrics.revenueChangePercent}% vs prior month)
-- 30-Day Orders: ${structuredData.metrics.totalOrders} orders (${
-    structuredData.metrics.ordersChangePercent >= 0 ? "+" : ""
-  }${structuredData.metrics.ordersChangePercent}%)
+- 30-Day Orders: ${structuredData.metrics.totalOrders} orders
 - Average Order Value (AOV): $${structuredData.metrics.averageOrderValue}
-- Total Customers: ${
-    structuredData.metrics.totalCustomers
-  } (Inactive/Dormant: ${structuredData.dormantCustomersCount})
-- Outstanding/Overdue Invoices: ${
-    structuredData.metrics.outstandingInvoicesCount
-  } invoices amounting to $${structuredData.metrics.outstandingInvoicesAmount.toLocaleString()}
-- Low Stock Alerts: ${
-    structuredData.metrics.lowStockItemsCount
-  } products below safety inventory threshold
-- Top 5 Products by Revenue: ${JSON.stringify(structuredData.topProducts)}
-- Critical Low Stock Items: ${JSON.stringify(structuredData.lowStockProducts)}
-- Top VIP Customers: ${JSON.stringify(structuredData.topCustomers)}
+- Total Customers: ${structuredData.metrics.totalCustomers} (Inactive/Dormant: ${structuredData.dormantCustomersCount})
+- Outstanding/Overdue Invoices: ${structuredData.metrics.outstandingInvoicesCount} invoices totaling $${structuredData.metrics.outstandingInvoicesAmount.toLocaleString()}
+- Low Stock Alerts: ${structuredData.metrics.lowStockItemsCount} products below safety inventory threshold
+- Top Products: ${JSON.stringify(structuredData.topProducts)}
+- Low Stock Items: ${JSON.stringify(structuredData.lowStockProducts)}
+- Top Customers: ${JSON.stringify(structuredData.topCustomers)}
 - Overdue Invoices: ${JSON.stringify(structuredData.overdueInvoicesSample)}
 
 Guidelines for your response:
-1. Always base your numbers and insights directly on the verified context above.
+1. Always base your numbers and insights directly on the verified context above. Never fabricate data.
 2. Structure your response with clean Markdown: use clear bold headings, bullet points, numbers, and percentage comparisons.
-3. Provide concrete, actionable business recommendations (e.g. inventory restocks, VIP outreach, overdue invoice collection).
-4. Tone: Senior COO / VP of Analytics—concise, data-driven, strategic, and professional.
-5. If asked for a summary, format it with an Executive Summary, Key Drivers, and Next Actions.`;
+3. Provide concrete, actionable business recommendations (e.g. inventory restocks, customer outreach, invoice collections).
+4. Tone: Senior COO / VP of Analytics—concise, data-driven, strategic, and professional.`;
 
   if (ai) {
     try {
@@ -77,7 +78,7 @@ Guidelines for your response:
     }
   }
 
-  // Graceful deterministic fallback when Gemini API key is missing or offline
+  // Graceful deterministic fallback grounded strictly in real database records
   return {
     content: generateFallbackBusinessResponse(prompt, structuredData),
     source: "local-engine",
@@ -86,12 +87,12 @@ Guidelines for your response:
 
 export async function generateAIReport(
   reportType: "daily" | "weekly" | "monthly" | "sales" | "inventory" | "customer",
-  businessId: string = "biz_nexora_labs"
+  businessId: string
 ) {
   const structuredData = getStructuredBusinessContext(businessId);
-  const prompt = `Generate a comprehensive ${reportType.toUpperCase()} executive business performance report for ${
+  const prompt = `Generate an executive ${reportType.toUpperCase()} performance report for ${
     structuredData.businessName
-  }. Include key metrics, trend analysis, department breakdown, risk warnings, and strategic initiatives for next cycle.`;
+  } based on current database records. Include key metrics, trends, warnings, and recommended actions.`;
 
   const result = await askBusinessAssistant(prompt, businessId);
   return {
@@ -106,62 +107,40 @@ function generateFallbackBusinessResponse(prompt: string, data: ReturnType<typeo
   const lower = prompt.toLowerCase();
 
   if (lower.includes("revenue") || lower.includes("sales") || lower.includes("earn")) {
-    return `### Executive Revenue Performance Analysis
+    return `### Revenue Performance Overview
 
-**${data.businessName}** generated **$${data.metrics.totalRevenue.toLocaleString()}** over the trailing 30 days, reflecting an **${data.metrics.revenueChangePercent}% expansion** compared with the prior period.
+**${data.businessName}** generated **$${data.metrics.totalRevenue.toLocaleString()}** over the trailing 30 days.
 
-* **Total Fulfilled Orders**: ${data.metrics.totalOrders} (${data.metrics.ordersChangePercent > 0 ? "+" : ""}${data.metrics.ordersChangePercent}% growth)
+* **Orders Processed**: ${data.metrics.totalOrders}
 * **Average Order Value (AOV)**: $${data.metrics.averageOrderValue.toFixed(2)}
-* **Top Revenue Generator**: ${data.topProducts[0]?.name || "Edge Hub Pro"} ($${data.topProducts[0]?.revenue.toLocaleString()})
+* **Catalog Size**: ${data.totalCatalogSize} products
 
-### Key Growth Observation
-Hardware products drove 58% of gross margin, with software subscription renewals contributing recurring cash flow stability.`;
+${data.topProducts.length > 0 ? `* **Top Performing Product**: ${data.topProducts[0].name} ($${data.topProducts[0].revenue.toLocaleString()})` : "No products recorded yet."}`;
   }
 
   if (lower.includes("product") || lower.includes("stock") || lower.includes("inventory")) {
+    if (data.lowStockProducts.length === 0) {
+      return `### Inventory Audit\n\nAll products in **${data.businessName}** are currently at or above healthy safety thresholds (${data.totalCatalogSize} total products tracked).`;
+    }
     const lowStockList = data.lowStockProducts.map(p => `* **${p.name}** (SKU: \`${p.sku}\`): **${p.currentStock} units** remaining (Threshold: ${p.threshold})`).join("\n");
-    return `### Inventory & Product Performance Audit
-
-Currently, **${data.lowStockProducts.length} items** are flagged at or below safety stock levels:
-
-${lowStockList}
-
-### Priority Action Plan
-1. **Authorize immediate replenishment** for ${data.lowStockProducts[0]?.name || "Quantum Core"} to prevent out-of-stock lost revenue.
-2. Review vendor fulfillment lead times for high-margin sensor modules.`;
+    return `### Inventory & Stock Audit\n\nCurrently, **${data.lowStockProducts.length} items** are flagged at or below safety stock levels:\n\n${lowStockList}\n\n**Action**: Authorize replenishment to avoid stockout.`;
   }
 
-  if (lower.includes("customer") || lower.includes("client") || lower.includes("vip")) {
-    return `### Customer Base & Retention Health
-
-* **Active Customer Base**: ${data.metrics.totalCustomers} enterprise & commercial accounts
-* **Dormant Accounts (>60 days)**: ${data.dormantCustomersCount} accounts require re-engagement
-* **Top Enterprise VIP**: **${data.topCustomers[0]?.name}** (${data.topCustomers[0]?.company}) with **$${data.topCustomers[0]?.totalSpending.toLocaleString()}** cumulative spend across ${data.topCustomers[0]?.totalOrders} orders.
-
-### Recommendation
-Trigger an automated CRM reactivation email campaign with a 10% catalog incentive targeting inactive accounts.`;
+  if (lower.includes("customer") || lower.includes("client") || lower.includes("crm")) {
+    return `### Customer Base Health\n\n* **Active Accounts**: ${data.metrics.totalCustomers}\n* **Dormant Accounts (>60 days)**: ${data.dormantCustomersCount}\n\n${data.topCustomers.length > 0 ? `* **Top Account**: **${data.topCustomers[0].name}** ($${data.topCustomers[0].totalSpending.toLocaleString()} spend across ${data.topCustomers[0].totalOrders} orders)` : "No customer purchase history recorded yet."}`;
   }
 
-  if (lower.includes("invoice") || lower.includes("overdue") || lower.includes("payment")) {
-    return `### Accounts Receivable & Overdue Invoices
-
-* **Overdue Invoices Count**: **${data.metrics.outstandingInvoicesCount} invoices**
-* **Total Outstanding Receivables**: **$${data.metrics.outstandingInvoicesAmount.toLocaleString()}**
-* **Average Collection Period**: 28.4 days (Net 30 terms)
-
-### High-Priority Action
-Send automated statement reminder emails with 1-click ACH payment links to recover overdue balances.`;
+  if (lower.includes("invoice") || lower.includes("overdue") || lower.includes("receivable")) {
+    return `### Accounts Receivable Status\n\n* **Overdue Invoices**: ${data.metrics.outstandingInvoicesCount}\n* **Outstanding Balance**: $${data.metrics.outstandingInvoicesAmount.toLocaleString()}\n\nRecommended: Send statement reminders to collect overdue accounts.`;
   }
 
-  return `### Nexora AI Business Overview
+  return `### Operating Snapshot for ${data.businessName}
 
-Here is the current operating snapshot for **${data.businessName}**:
-
-* **Monthly Revenue**: $${data.metrics.totalRevenue.toLocaleString()} (${data.metrics.revenueChangePercent > 0 ? "+" : ""}${data.metrics.revenueChangePercent}%)
-* **Orders Processed**: ${data.metrics.totalOrders}
+* **30-Day Revenue**: $${data.metrics.totalRevenue.toLocaleString()}
+* **Orders**: ${data.metrics.totalOrders}
 * **Active Accounts**: ${data.metrics.totalCustomers}
-* **Pending Receivables**: $${data.metrics.outstandingInvoicesAmount.toLocaleString()} (${data.metrics.outstandingInvoicesCount} overdue)
-* **Inventory Alerts**: ${data.metrics.lowStockItemsCount} items low in stock
+* **Catalog Items**: ${data.totalCatalogSize}
+* **Pending Overdue**: $${data.metrics.outstandingInvoicesAmount.toLocaleString()}
 
-*Ask anything specific regarding sales breakdown, product rankings, overdue accounts, or ask me to draft a full executive report.*`;
+Ask any specific question about your sales trends, inventory, or overdue invoices.`;
 }

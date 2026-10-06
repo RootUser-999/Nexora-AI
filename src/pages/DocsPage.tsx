@@ -19,16 +19,16 @@ export function DocsPage() {
       group: 'Authentication',
       method: 'POST',
       path: '/api/auth/login',
-      description: 'Authenticate user and return JWT bearer token and permissions.',
-      payload: '{\n  "email": "demo@nexora.local",\n  "role": "owner"\n}',
-      response: '{\n  "token": "jwt_nexora_...",\n  "user": { "id": "usr_1", "role": "owner" },\n  "business": { "id": "biz_nexora_labs" }\n}'
+      description: 'Authenticate user with password and return JWT bearer token and business context.',
+      payload: '{\n  "email": "user@example.com",\n  "password": "SecurePassword123!"\n}',
+      response: '{\n  "token": "jwt_nexora_...",\n  "user": { "id": "usr_1", "role": "owner", "name": "Executive" },\n  "business": { "id": "biz_1", "name": "Company" }\n}'
     },
     {
       group: 'Dashboard',
       method: 'GET',
       path: '/api/dashboard',
       description: 'Aggregate executive KPIs: 30-day revenue expansion, orders, low-stock count, and recent orders.',
-      params: '?businessId=biz_nexora_labs',
+      params: '?businessId=biz_1',
       response: '{\n  "metrics": { "totalRevenue": 24850, "revenueChangePercent": 18.4, "totalOrders": 48 },\n  "recentOrders": [...]\n}'
     },
     {
@@ -36,15 +36,15 @@ export function DocsPage() {
       method: 'POST',
       path: '/api/ai/chat',
       description: 'Submit natural language query to Gemini 3.8 Flash with server-side injected business calculations.',
-      payload: '{\n  "prompt": "How much revenue did we generate this month?",\n  "businessId": "biz_nexora_labs"\n}',
-      response: '{\n  "message": {\n    "role": "assistant",\n    "content": "Nexora Labs generated $24,850.00 across 48 orders (+18.4% vs last month)..."\n  },\n  "source": "gemini-3.8-flash"\n}'
+      payload: '{\n  "prompt": "How much revenue did we generate this month?",\n  "businessId": "biz_1"\n}',
+      response: '{\n  "message": {\n    "role": "assistant",\n    "content": "Your business generated $24,850.00 across 48 orders (+18.4% vs last month)..."\n  },\n  "source": "gemini-3.8-flash"\n}'
     },
     {
       group: 'AI Executive Reports',
       method: 'POST',
       path: '/api/ai/report',
       description: 'Synthesize comprehensive executive performance report using live database context.',
-      payload: '{\n  "type": "monthly",\n  "businessId": "biz_nexora_labs"\n}',
+      payload: '{\n  "type": "monthly",\n  "businessId": "biz_1"\n}',
       response: '{\n  "title": "Monthly Executive Report",\n  "generatedAt": "2026-10-05T09:00:00Z",\n  "content": "### Executive Performance Overview..."\n}'
     },
     {
@@ -52,15 +52,15 @@ export function DocsPage() {
       method: 'GET',
       path: '/api/customers',
       description: 'List, filter, and search corporate customer accounts with AI lifetime insights.',
-      params: '?businessId=biz_nexora_labs&status=active&search=veloce',
-      response: '{\n  "customers": [\n    { "id": "cust_1", "name": "David Kowalski", "totalSpending": 14200, "status": "active" }\n  ],\n  "total": 1\n}'
+      params: '?businessId=biz_1&status=active&search=client',
+      response: '{\n  "customers": [\n    { "id": "cust_1", "name": "Enterprise Client", "totalSpending": 14200, "status": "active" }\n  ],\n  "total": 1\n}'
     },
     {
       group: 'Products & SKUs',
       method: 'GET',
       path: '/api/products',
       description: 'Retrieve product catalog with cost margins, inventory levels, and stock alert status.',
-      params: '?businessId=biz_nexora_labs&category=Hardware',
+      params: '?businessId=biz_1&category=Hardware',
       response: '{\n  "products": [\n    { "id": "prod_1", "sku": "NXR-E100", "price": 499, "stock": 42, "status": "in_stock" }\n  ]\n}'
     },
     {

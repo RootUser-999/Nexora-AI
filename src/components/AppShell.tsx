@@ -146,8 +146,8 @@ export function AppShell({ children }: AppShellProps) {
               <div className="flex items-center gap-2 truncate">
                 <Building2 className="w-4 h-4 text-indigo-400 shrink-0" />
                 <div className="truncate">
-                  <div className="font-semibold text-slate-200 truncate">{activeBusiness?.name || 'Nexora Labs'}</div>
-                  <div className="text-[10px] text-slate-400 font-mono truncate">{activeBusiness?.currencySymbol} {activeBusiness?.currency} · Net 30</div>
+                  <div className="font-semibold text-slate-200 truncate">{activeBusiness?.name || 'My Business Workspace'}</div>
+                  <div className="text-[10px] text-slate-400 font-mono truncate">{activeBusiness?.currencySymbol || '$'} {activeBusiness?.currency || 'USD'} · Net 30</div>
                 </div>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -222,7 +222,7 @@ export function AppShell({ children }: AppShellProps) {
                 {currentUser?.name?.charAt(0) || 'S'}
               </div>
               <div className="truncate">
-                <div className="text-xs font-medium text-slate-200 truncate">{currentUser?.name || 'Sarah Jenkins'}</div>
+                <div className="text-xs font-medium text-slate-200 truncate">{currentUser?.name || 'Administrator'}</div>
                 <div className="text-[10px] text-slate-400 capitalize">{currentUser?.role || 'owner'}</div>
               </div>
             </div>

@@ -24,12 +24,7 @@ export function ReportsPage() {
     generatedAt: string;
     content: string;
     source: string;
-  } | null>({
-    title: 'Monthly Executive Business Report',
-    generatedAt: new Date().toISOString(),
-    content: `### Executive Performance Overview\n\nFor the active billing period, **Nexora Labs** delivered top-line revenue of **$24,850.00** across **48 fulfilled customer orders**, representing an **18.4% increase** over the preceding month ($20,975.00).\n\n### Core Department Findings\n* **Commercial Sales**: Nexora Edge Hub Pro (SKU: NXR-E100) led product revenue at $8,982.00.\n* **Accounts Receivable**: 7 invoices ($8,420.00) exceed standard Net 30 terms.\n* **Inventory Operations**: 5 products flagged below critical safety threshold, notably Quantum Core IoT Sensor Nodes (6 remaining).\n* **CRM & Retention**: 105 total active business accounts, with 18 accounts identified as dormant (>60 days).\n\n### Strategic Action Items\n1. Authorize supplier intake for high-turnover IoT nodes.\n2. Dispatch automated Net 30 statement reminders to overdue client accounts.\n3. Execute targeted VIP reactivation campaign with 10% catalog discount.`,
-    source: 'gemini-3.8-flash'
-  });
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -126,12 +121,12 @@ export function ReportsPage() {
       </div>
 
       {/* Report Sheet View */}
-      {generatedReport && (
+      {generatedReport ? (
         <div className="p-8 rounded-xl bg-slate-900/60 border border-slate-800 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-4 mb-6 border-b border-slate-800">
             <div>
               <span className="text-[10px] font-mono text-indigo-400 uppercase tracking-wider font-semibold">
-                Nexora Verified Audit Document · {activeBusiness?.name || 'Nexora Labs'}
+                Nexora Verified Audit Document · {activeBusiness?.name || 'Workspace'}
               </span>
               <h2 className="text-lg font-bold text-white mt-1">{generatedReport.title}</h2>
             </div>
@@ -149,6 +144,10 @@ export function ReportsPage() {
             <span>Confidential Executive Document · Not for unauthorized public distribution</span>
             <span className="font-mono">Document ID: NXR-REP-{Date.now().toString().slice(-6)}</span>
           </div>
+        </div>
+      ) : (
+        <div className="p-12 text-center rounded-xl bg-slate-900/40 border border-slate-800 text-slate-500 text-xs">
+          Select a report type above and click "Generate AI Report" to synthesize executive intelligence from your live database.
         </div>
       )}
     </div>

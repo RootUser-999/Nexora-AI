@@ -21,25 +21,25 @@ import {
 import { useApp } from '../context/AppContext.tsx';
 
 export function LandingPage() {
-  const { enterDemo, setCurrentView } = useApp();
+  const { openAuthModal, currentUser, setCurrentView } = useApp();
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const sampleAiQuestions = [
     {
       q: "How much revenue did we generate this month?",
-      a: "Nexora Labs generated $24,850.00 across 48 orders in the trailing 30 days (+18.4% vs last month). Top revenue driver was the Nexora Edge Hub Pro."
+      a: "Nexora analyzes trailing 30-day transactions across all fulfilled orders with live percentage changes vs the previous period, categorizing revenue by product and department."
     },
     {
       q: "Which product is performing best?",
-      a: "The Nexora Edge Hub Pro (SKU: NXR-E100) ranks #1 with $20,958 in cumulative sales and 42 units sold, yielding an exceptional 58% gross margin."
+      a: "Identifies your #1 revenue-generating SKU by cumulative sales volume, revenue contribution, and profit margin."
     },
     {
       q: "Which customers haven't purchased in 60+ days?",
-      a: "18 corporate accounts are currently dormant (>60 days). We recommend triggering the automated reactivation discount campaign."
+      a: "Flags dormant customer accounts automatically and generates personalized re-engagement campaigns."
     },
     {
       q: "What are my lowest-stock products?",
-      a: "Quantum Core IoT Sensor Node has only 6 units remaining (Threshold: 15). Automated purchase orders are ready for approval."
+      a: "Monitors real-time inventory against configurable safety thresholds and alerts you to stockout risks before fulfillment stops."
     }
   ];
 
@@ -95,19 +95,31 @@ export function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={enterDemo}
-              className="px-3.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition-colors"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={enterDemo}
-              className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm shadow-indigo-600/30 transition-all flex items-center gap-1.5"
-            >
-              <span>Explore Demo</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            {currentUser ? (
+              <button
+                onClick={() => setCurrentView('dashboard')}
+                className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm shadow-indigo-600/30 transition-all flex items-center gap-1.5"
+              >
+                <span>Go to Workspace</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => openAuthModal('login')}
+                  className="px-3.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition-colors"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => openAuthModal('register')}
+                  className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm shadow-indigo-600/30 transition-all flex items-center gap-1.5"
+                >
+                  <span>Create Account</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -119,7 +131,7 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-300 mb-8">
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="font-medium text-slate-200">Nexora 2.0 Released</span>
+            <span className="font-medium text-slate-200">Nexora Production Platform</span>
             <span className="text-slate-500">·</span>
             <span className="text-slate-400">Contextual Gemini 3.8 Flash Assistant</span>
           </div>
@@ -138,10 +150,10 @@ export function LandingPage() {
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={enterDemo}
+              onClick={() => currentUser ? setCurrentView('dashboard') : openAuthModal('register')}
               className="w-full sm:w-auto px-6 py-3.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
             >
-              <span>Explore Live Demo</span>
+              <span>{currentUser ? 'Go to Dashboard' : 'Get Started — Free Account'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
@@ -155,13 +167,13 @@ export function LandingPage() {
 
           <div className="mt-6 text-xs text-slate-500 flex items-center justify-center gap-6">
             <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-emerald-400" /> Pre-loaded 100+ Customers & 300+ Orders
+              <Check className="w-3.5 h-3.5 text-emerald-400" /> Real Multi-Tenant Workspace
             </span>
             <span className="flex items-center gap-1.5">
               <Check className="w-3.5 h-3.5 text-emerald-400" /> No credit card required
             </span>
             <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-emerald-400" /> Instant 1-Click Launch
+              <Check className="w-3.5 h-3.5 text-emerald-400" /> Secure Isolated Data
             </span>
           </div>
 
@@ -178,41 +190,41 @@ export function LandingPage() {
               </div>
               <div className="flex items-center gap-2 font-mono text-[11px] text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                Connected: Nexora Labs
+                Multi-Tenant Architecture
               </div>
             </div>
 
-            {/* Micro Dashboard UI Mock */}
+            {/* Micro Dashboard UI Feature Overview */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
               <div className="p-3 bg-slate-950/60 border border-slate-800/60 rounded-lg">
-                <div className="text-[11px] text-slate-400">Monthly Revenue</div>
-                <div className="text-xl font-bold text-white mt-1">$24,850</div>
-                <div className="text-[10px] text-emerald-400 mt-1 font-mono">+18.4% vs last mo</div>
+                <div className="text-[11px] text-slate-400">Revenue Tracking</div>
+                <div className="text-xl font-bold text-white mt-1">Real-time</div>
+                <div className="text-[10px] text-emerald-400 mt-1 font-mono">Calculated from orders</div>
               </div>
               <div className="p-3 bg-slate-950/60 border border-slate-800/60 rounded-lg">
-                <div className="text-[11px] text-slate-400">Fulfilled Orders</div>
-                <div className="text-xl font-bold text-white mt-1">48</div>
-                <div className="text-[10px] text-emerald-400 mt-1 font-mono">+17.1% vs last mo</div>
+                <div className="text-[11px] text-slate-400">Order Management</div>
+                <div className="text-xl font-bold text-white mt-1">Automated</div>
+                <div className="text-[10px] text-emerald-400 mt-1 font-mono">Inventory deduction</div>
               </div>
               <div className="p-3 bg-slate-950/60 border border-slate-800/60 rounded-lg">
-                <div className="text-[11px] text-slate-400">Active CRM Accounts</div>
-                <div className="text-xl font-bold text-white mt-1">105</div>
-                <div className="text-[10px] text-emerald-400 mt-1 font-mono">+12.5% YoY</div>
+                <div className="text-[11px] text-slate-400">CRM Directory</div>
+                <div className="text-xl font-bold text-white mt-1">Unified</div>
+                <div className="text-[10px] text-emerald-400 mt-1 font-mono">Customer purchase history</div>
               </div>
               <div className="p-3 bg-slate-950/60 border border-slate-800/60 rounded-lg">
-                <div className="text-[11px] text-slate-400">Low Stock Warnings</div>
-                <div className="text-xl font-bold text-amber-400 mt-1">5 Items</div>
-                <div className="text-[10px] text-amber-400/80 mt-1 font-mono">Action required</div>
+                <div className="text-[11px] text-slate-400">Stock Warnings</div>
+                <div className="text-xl font-bold text-amber-400 mt-1">Proactive</div>
+                <div className="text-[10px] text-amber-400/80 mt-1 font-mono">Threshold alerts</div>
               </div>
             </div>
 
-            {/* Click to enter callout overlay */}
+            {/* Callout overlay */}
             <div className="bg-gradient-to-t from-slate-950 to-transparent pt-12 pb-6 text-center">
               <button
-                onClick={enterDemo}
+                onClick={() => currentUser ? setCurrentView('dashboard') : openAuthModal('register')}
                 className="px-5 py-2.5 text-xs font-semibold text-indigo-300 bg-indigo-950/80 hover:bg-indigo-900/80 border border-indigo-700/50 rounded-lg transition-all shadow-lg"
               >
-                Launch Live Interactive Workspace →
+                {currentUser ? 'Access Workspace Dashboard →' : 'Sign In or Create Account to Launch Workspace →'}
               </button>
             </div>
           </div>
@@ -347,10 +359,10 @@ export function LandingPage() {
 
               <div className="mt-8">
                 <button
-                  onClick={enterDemo}
+                  onClick={() => currentUser ? setCurrentView('ai-assistant') : openAuthModal('login')}
                   className="px-5 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm shadow-indigo-600/30 transition-all flex items-center gap-2"
                 >
-                  <span>Test in Live AI Workspace</span>
+                  <span>{currentUser ? 'Consult AI Assistant' : 'Sign In to Consult AI'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -462,7 +474,7 @@ export function LandingPage() {
                 </ul>
               </div>
               <button
-                onClick={enterDemo}
+                onClick={() => currentUser ? setCurrentView('dashboard') : openAuthModal('register')}
                 className="mt-8 w-full py-2.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
               >
                 Get Started Free
@@ -488,10 +500,10 @@ export function LandingPage() {
                 </ul>
               </div>
               <button
-                onClick={enterDemo}
+                onClick={() => currentUser ? setCurrentView('dashboard') : openAuthModal('register')}
                 className="mt-8 w-full py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow-md shadow-indigo-600/20"
               >
-                Start 14-Day Free Trial
+                Start Free Trial
               </button>
             </div>
 
@@ -511,10 +523,10 @@ export function LandingPage() {
                 </ul>
               </div>
               <button
-                onClick={enterDemo}
+                onClick={() => currentUser ? setCurrentView('dashboard') : openAuthModal('register')}
                 className="mt-8 w-full py-2.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
               >
-                Contact Sales
+                Register Business
               </button>
             </div>
           </div>
@@ -525,7 +537,7 @@ export function LandingPage() {
       <section className="py-20 border-b border-slate-800/80 bg-slate-900/20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-3">Portfolio Client Feedback</h2>
+            <h2 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-3">Client Feedback</h2>
             <p className="text-3xl font-extrabold text-white tracking-tight">
               Trusted by modern SME leaders.
             </p>
@@ -549,7 +561,7 @@ export function LandingPage() {
 
             <div className="p-6 rounded-xl bg-slate-900/60 border border-slate-800">
               <p className="text-xs text-slate-300 italic leading-relaxed">
-                "The PDF invoice generator and low-stock notification alerts saved our fulfillment team over 15 hours a week. The UI feels like a $100k enterprise platform."
+                "The PDF invoice generator and low-stock notification alerts saved our fulfillment team over 15 hours a week. The UI feels like an enterprise platform."
               </p>
               <div className="mt-4 pt-4 border-t border-slate-800 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-indigo-300 text-xs">
@@ -557,14 +569,14 @@ export function LandingPage() {
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-white">Sophia Chen</div>
-                  <div className="text-[10px] text-slate-400">Finance Director, Apex Retail</div>
+                  <div className="text-[10px] text-slate-400">Finance Director</div>
                 </div>
               </div>
             </div>
 
             <div className="p-6 rounded-xl bg-slate-900/60 border border-slate-800">
               <p className="text-xs text-slate-300 italic leading-relaxed">
-                "The tenant isolation, audit logging, and clean REST API made this the easiest deployment our engineering team has ever audited. Outstanding portfolio build."
+                "The tenant isolation, audit logging, and clean REST API made this the easiest deployment our engineering team has ever audited."
               </p>
               <div className="mt-4 pt-4 border-t border-slate-800 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-indigo-300 text-xs">
@@ -618,14 +630,14 @@ export function LandingPage() {
             Ready to upgrade your business management?
           </h2>
           <p className="mt-4 text-sm text-slate-400 leading-relaxed">
-            Experience the live interactive demo loaded with 100+ customers, 30+ products, real inventory movements, and Gemini 3.8 Flash intelligence.
+            Create your business account to experience CRM, automated invoices, inventory tracking, and Gemini 3.8 Flash intelligence.
           </p>
           <div className="mt-8 flex justify-center gap-4">
             <button
-              onClick={enterDemo}
+              onClick={() => currentUser ? setCurrentView('dashboard') : openAuthModal('register')}
               className="px-6 py-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-md shadow-indigo-600/30 transition-all flex items-center gap-2"
             >
-              <span>Explore Demo Workspace</span>
+              <span>{currentUser ? 'Go to Workspace Dashboard' : 'Create Free Business Account'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -647,10 +659,10 @@ export function LandingPage() {
           <div>
             <div className="text-slate-300 font-semibold mb-3">Product</div>
             <ul className="space-y-2">
-              <li><button onClick={enterDemo} className="hover:text-slate-300">Live Dashboard</button></li>
-              <li><button onClick={enterDemo} className="hover:text-slate-300">AI Assistant</button></li>
-              <li><button onClick={enterDemo} className="hover:text-slate-300">Invoices & PDF</button></li>
-              <li><button onClick={enterDemo} className="hover:text-slate-300">Inventory Tracker</button></li>
+              <li><button onClick={() => currentUser ? setCurrentView('dashboard') : openAuthModal('login')} className="hover:text-slate-300">Live Dashboard</button></li>
+              <li><button onClick={() => currentUser ? setCurrentView('ai-assistant') : openAuthModal('login')} className="hover:text-slate-300">AI Assistant</button></li>
+              <li><button onClick={() => currentUser ? setCurrentView('invoices') : openAuthModal('login')} className="hover:text-slate-300">Invoices & PDF</button></li>
+              <li><button onClick={() => currentUser ? setCurrentView('inventory') : openAuthModal('login')} className="hover:text-slate-300">Inventory Tracker</button></li>
             </ul>
           </div>
           <div>
@@ -675,7 +687,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 border-t border-slate-900 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} Nexora AI SaaS Platform. All rights reserved.</p>
           <div className="flex gap-4">
-            <span className="font-mono text-[11px] text-indigo-400">Commercial SaaS Portfolio Edition</span>
+            <span className="font-mono text-[11px] text-indigo-400">Enterprise SaaS Edition</span>
           </div>
         </div>
       </footer>

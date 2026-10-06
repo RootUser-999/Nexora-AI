@@ -67,7 +67,7 @@ export function AuditPage() {
         </div>
 
         <div className="text-xs text-slate-400 font-mono hidden sm:block">
-          Scope: {activeBusiness?.name || 'Nexora Labs'}
+          Scope: {activeBusiness?.name || 'Workspace'}
         </div>
       </div>
 

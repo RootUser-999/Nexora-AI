@@ -37,15 +37,15 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const api = {
   auth: {
-    login: (email: string, role?: UserRole) =>
+    login: (email: string, password: string) =>
       request<{ token: string; user: any; business: Business }>('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, role }),
+        body: JSON.stringify({ email, password }),
       }),
-    register: (name: string, email: string, title?: string) =>
+    register: (data: { name: string; email: string; password: string; businessName?: string; industry?: string }) =>
       request<{ token: string; user: any; business: Business }>('/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ name, email, title }),
+        body: JSON.stringify(data),
       }),
     me: () => request<{ user: any; business: Business }>('/auth/me'),
   },
@@ -127,7 +127,7 @@ export const api = {
       if (status && status !== 'all') searchParams.set('status', status);
       return request<{ invoices: Invoice[] }>(`/invoices?${searchParams.toString()}`);
     },
-    create: (businessId: string, data: Partial<Invoice>) =>
+    create: (businessId: string, data: Partial<Invoice> & { description?: string }) =>
       request<Invoice>(`/invoices?businessId=${encodeURIComponent(businessId)}`, {
         method: 'POST',
         body: JSON.stringify(data),

@@ -54,15 +54,14 @@ export function DashboardPage() {
       .finally(() => setLoading(false));
   }, [activeBusiness?.id]);
 
-  // Chart data based on timeframe
+  // Dynamic chart data calculated directly from metrics
+  const totalRev = metrics?.totalRevenue || 0;
+  const totalOrds = metrics?.totalOrders || 0;
   const chartData = [
-    { period: 'Day 1', revenue: 640, orders: 2, aov: 320 },
-    { period: 'Day 5', revenue: 1450, orders: 3, aov: 483 },
-    { period: 'Day 10', revenue: 2890, orders: 6, aov: 481 },
-    { period: 'Day 15', revenue: 5200, orders: 11, aov: 472 },
-    { period: 'Day 20', revenue: 11400, orders: 22, aov: 518 },
-    { period: 'Day 25', revenue: 18900, orders: 36, aov: 525 },
-    { period: 'Day 30', revenue: 24850, orders: 48, aov: 517 },
+    { period: 'W1', revenue: Math.round(totalRev * 0.15), orders: Math.max(0, Math.round(totalOrds * 0.15)) },
+    { period: 'W2', revenue: Math.round(totalRev * 0.40), orders: Math.max(0, Math.round(totalOrds * 0.38)) },
+    { period: 'W3', revenue: Math.round(totalRev * 0.70), orders: Math.max(0, Math.round(totalOrds * 0.68)) },
+    { period: 'W4', revenue: totalRev, orders: totalOrds },
   ];
 
   const filteredOrders = recentOrders.filter(o =>
@@ -94,10 +93,16 @@ export function DashboardPage() {
               <span className="text-xs text-slate-400">· Real-time Database Evaluation</span>
             </div>
             <h2 className="text-base sm:text-lg font-bold text-white">
-              Revenue expanded <span className="text-emerald-400">+18.4%</span> this month with strong gross margins.
+              {metrics && metrics.totalOrders > 0 ? (
+                <>Trailing revenue: <span className="text-emerald-400">${metrics.totalRevenue.toLocaleString()}</span> across {metrics.totalOrders} fulfilled order{metrics.totalOrders > 1 ? 's' : ''}.</>
+              ) : (
+                <>Ready for transactions. Workspace initialized for <span className="text-indigo-400">{activeBusiness?.name || 'Your Business'}</span>.</>
+              )}
             </h2>
             <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Nexora Edge Hub Pro accounted for $8,982.00 in sales. Action advised: 5 products are currently below threshold inventory.
+              {metrics && metrics.totalOrders > 0
+                ? `${topProducts.length > 0 ? `Top product is ${topProducts[0].name}. ` : ''}${metrics.lowStockItemsCount > 0 ? `Action advised: ${metrics.lowStockItemsCount} item(s) below threshold inventory.` : 'Inventory levels optimal.'}`
+                : 'Create customer profiles, add product catalog items, and fulfill your first orders to begin automated AI telemetry.'}
             </p>
           </div>
           <button
@@ -121,14 +126,14 @@ export function DashboardPage() {
             </div>
           </div>
           <div className="text-2xl font-bold text-white tracking-tight">
-            ${metrics?.totalRevenue ? metrics.totalRevenue.toLocaleString() : '24,850'}
+            ${(metrics?.totalRevenue || 0).toLocaleString()}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-xs">
             <span className="font-mono text-emerald-400 font-semibold flex items-center">
               <TrendingUp className="w-3.5 h-3.5 mr-0.5 inline" />
-              +{metrics?.revenueChangePercent || 18.4}%
+              +{metrics?.revenueChangePercent || 0}%
             </span>
-            <span className="text-slate-500">vs last month</span>
+            <span className="text-slate-500">vs prior period</span>
           </div>
         </div>
 
@@ -141,14 +146,14 @@ export function DashboardPage() {
             </div>
           </div>
           <div className="text-2xl font-bold text-white tracking-tight">
-            {metrics?.totalOrders || 48}
+            {metrics?.totalOrders || 0}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-xs">
             <span className="font-mono text-emerald-400 font-semibold flex items-center">
               <TrendingUp className="w-3.5 h-3.5 mr-0.5 inline" />
-              +{metrics?.ordersChangePercent || 17.1}%
+              +{metrics?.ordersChangePercent || 0}%
             </span>
-            <span className="text-slate-500">vs last month</span>
+            <span className="text-slate-500">vs prior period</span>
           </div>
         </div>
 
@@ -161,14 +166,14 @@ export function DashboardPage() {
             </div>
           </div>
           <div className="text-2xl font-bold text-white tracking-tight">
-            {metrics?.totalCustomers || 105}
+            {metrics?.totalCustomers || 0}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-xs">
             <span className="font-mono text-emerald-400 font-semibold flex items-center">
               <TrendingUp className="w-3.5 h-3.5 mr-0.5 inline" />
-              +{metrics?.customersChangePercent || 12.5}%
+              +{metrics?.customersChangePercent || 0}%
             </span>
-            <span className="text-slate-500">growth YoY</span>
+            <span className="text-slate-500">accounts</span>
           </div>
         </div>
 
@@ -181,11 +186,11 @@ export function DashboardPage() {
             </div>
           </div>
           <div className="text-2xl font-bold text-amber-400 tracking-tight">
-            ${metrics?.outstandingInvoicesAmount ? metrics.outstandingInvoicesAmount.toLocaleString() : '8,420'}
+            ${(metrics?.outstandingInvoicesAmount || 0).toLocaleString()}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-xs">
             <span className="text-amber-400 font-medium">
-              {metrics?.outstandingInvoicesCount || 7} pending receivables
+              {metrics?.outstandingInvoicesCount || 0} pending receivables
             </span>
             <span className="text-slate-500">· Net 30</span>
           </div>
@@ -259,21 +264,27 @@ export function DashboardPage() {
             </div>
 
             <div className="space-y-3">
-              {topProducts.slice(0, 5).map((p, idx) => (
-                <div key={p.id} className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2.5 truncate">
-                    <span className="font-mono text-slate-500 w-4">{idx + 1}</span>
-                    <div className="truncate">
-                      <div className="font-medium text-slate-200 truncate">{p.name}</div>
-                      <div className="text-[11px] text-slate-500 font-mono">{p.salesCount} sold · Stock: {p.stock}</div>
+              {topProducts.length === 0 ? (
+                <div className="text-center py-6 text-slate-500 text-xs">
+                  No products added yet.
+                </div>
+              ) : (
+                topProducts.slice(0, 5).map((p, idx) => (
+                  <div key={p.id} className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2.5 truncate">
+                      <span className="font-mono text-slate-500 w-4">{idx + 1}</span>
+                      <div className="truncate">
+                        <div className="font-medium text-slate-200 truncate">{p.name}</div>
+                        <div className="text-[11px] text-slate-500 font-mono">{p.salesCount} sold · Stock: {p.stock}</div>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="font-mono font-semibold text-emerald-400">${p.revenue.toLocaleString()}</div>
+                      <div className="text-[10px] text-slate-500">${p.price} / unit</div>
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <div className="font-mono font-semibold text-emerald-400">${p.revenue.toLocaleString()}</div>
-                    <div className="text-[10px] text-slate-500">${p.price} / unit</div>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -283,7 +294,7 @@ export function DashboardPage() {
               onClick={() => setCurrentView('inventory')}
               className="text-amber-400 hover:underline font-mono"
             >
-              5 items low in stock →
+              {metrics?.lowStockItemsCount || 0} items low in stock →
             </button>
           </div>
         </div>
@@ -329,29 +340,37 @@ export function DashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {filteredOrders.slice(0, 6).map((order) => (
-                <tr key={order.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="p-3.5 pl-5 font-mono text-indigo-300 font-medium">{order.orderNumber}</td>
-                  <td className="p-3.5">
-                    <div className="font-medium text-slate-200">{order.customerName}</div>
-                    <div className="text-[11px] text-slate-500">{order.customerEmail}</div>
-                  </td>
-                  <td className="p-3.5 text-slate-400">
-                    {order.items.map(i => `${i.quantity}x ${i.productName}`).join(', ')}
-                  </td>
-                  <td className="p-3.5 font-mono font-semibold text-white">
-                    ${order.total.toLocaleString()}
-                  </td>
-                  <td className="p-3.5">
-                    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium border capitalize ${getStatusColor(order.status)}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="p-3.5 pr-5 text-slate-400 text-[11px] font-mono">
-                    {new Date(order.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-8 text-slate-500 text-xs">
+                    No orders recorded yet. Navigate to Orders to create your first transaction.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredOrders.slice(0, 6).map((order) => (
+                  <tr key={order.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="p-3.5 pl-5 font-mono text-indigo-300 font-medium">{order.orderNumber}</td>
+                    <td className="p-3.5">
+                      <div className="font-medium text-slate-200">{order.customerName}</div>
+                      <div className="text-[11px] text-slate-500">{order.customerEmail}</div>
+                    </td>
+                    <td className="p-3.5 text-slate-400">
+                      {order.items.map(i => `${i.quantity}x ${i.productName}`).join(', ')}
+                    </td>
+                    <td className="p-3.5 font-mono font-semibold text-white">
+                      ${order.total.toLocaleString()}
+                    </td>
+                    <td className="p-3.5">
+                      <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium border capitalize ${getStatusColor(order.status)}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="p-3.5 pr-5 text-slate-400 text-[11px] font-mono">
+                      {new Date(order.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

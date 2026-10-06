@@ -24,19 +24,8 @@ export function AIAssistantPage() {
     {
       id: 'msg_welcome',
       role: 'assistant',
-      content: `### Hello, ${currentUser?.name?.split(' ')[0] || 'Executive'} 👋\n\nI am your **Nexora AI Business Intelligence Assistant**. I have verified live database context for **${activeBusiness?.name || 'Nexora Labs'}**.\n\nYou can query real metrics on:\n* **Revenue & Sales Trajectory**\n* **Top Performing & Low-Stock Products**\n* **Customer Lifetime Spending & Dormancy**\n* **Overdue Invoices & Collections**\n\nWhat would you like to explore today?`,
-      timestamp: new Date().toISOString(),
-      structuredCard: {
-        type: 'metric_comparison',
-        title: '30-Day Operational Snapshot',
-        items: [
-          { label: 'Revenue (30d)', value: '$24,850.00', trend: '+18.4%', isPositive: true },
-          { label: 'Active Customers', value: '105 Accounts', trend: '+12.5%', isPositive: true },
-          { label: 'Receivables Overdue', value: '$8,420.00', trend: '7 Invoices', isPositive: false },
-          { label: 'Low Stock Flagged', value: '5 Products', trend: 'Action Req.', isPositive: false },
-        ],
-        highlight: 'Overall business growth velocity is trending 6.4% above Q3 baseline.'
-      }
+      content: `### Hello, ${currentUser?.name?.split(' ')[0] || 'Executive'} 👋\n\nI am your **Nexora AI Business Intelligence Assistant**. I am connected directly to your active business workspace **${activeBusiness?.name || 'Workspace'}**.\n\nYou can query real metrics on:\n* **Revenue & Sales Trajectory**\n* **Top Performing & Low-Stock Products**\n* **Customer Lifetime Spending & Dormancy**\n* **Overdue Invoices & Collections**\n\nWhat would you like to explore today?`,
+      timestamp: new Date().toISOString()
     }
   ]);
   const [inputPrompt, setInputPrompt] = useState('');
@@ -103,7 +92,7 @@ export function AIAssistantPage() {
       {
         id: `msg_${Date.now()}`,
         role: 'assistant',
-        content: `Conversation reset. All queries remain grounded in **${activeBusiness?.name || 'Nexora Labs'}** transactional database records.`,
+        content: `Conversation reset. All queries remain grounded in **${activeBusiness?.name || 'Workspace'}** transactional database records.`,
         timestamp: new Date().toISOString()
       }
     ]);
@@ -174,7 +163,7 @@ export function AIAssistantPage() {
                 </span>
               </div>
               <div className="text-[10px] text-slate-400 font-mono">
-                Scoped to: {activeBusiness?.name || 'Nexora Labs'} · Multi-Tenant Isolated
+                Scoped to: {activeBusiness?.name || 'My Workspace'} · Multi-Tenant Isolated
               </div>
             </div>
           </div>

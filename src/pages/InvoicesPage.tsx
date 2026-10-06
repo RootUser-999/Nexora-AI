@@ -241,12 +241,12 @@ export function InvoicesPage() {
                 <div>
                   <div className="flex items-center gap-2 font-bold text-lg text-white mb-2">
                     <div className="w-7 h-7 rounded bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">N</div>
-                    {activeBusiness?.legalName || 'Nexora Labs Inc.'}
+                    {activeBusiness?.legalName || activeBusiness?.name || 'Commercial Business Entity'}
                   </div>
                   <div className="text-xs text-slate-400 space-y-0.5 leading-relaxed">
-                    <div>{activeBusiness?.address || '450 Lexington Avenue, Suite 1900'}</div>
-                    <div>{activeBusiness?.city || 'New York, NY 10017'}</div>
-                    <div>Email: {activeBusiness?.email || 'billing@nexoralabs.io'}</div>
+                    <div>{activeBusiness?.address || 'Corporate Headquarters'}</div>
+                    <div>{activeBusiness?.city || 'Operations Office'}</div>
+                    <div>Email: {activeBusiness?.email || 'billing@nexora.io'}</div>
                   </div>
                 </div>
 

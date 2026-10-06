@@ -37,7 +37,10 @@ interface AppContextType {
   theme: 'dark' | 'light';
   toggleTheme: () => void;
   setUserRole: (role: UserRole) => void;
-  enterDemo: () => Promise<void>;
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+  authModalMode: 'login' | 'register';
+  openAuthModal: (mode?: 'login' | 'register') => void;
   logout: () => void;
   refreshDataTrigger: number;
   triggerRefresh: () => void;
@@ -52,10 +55,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [refreshDataTrigger, setRefreshDataTrigger] = useState(0);
 
   const triggerRefresh = () => setRefreshDataTrigger(prev => prev + 1);
+
+  const openAuthModal = (mode: 'login' | 'register' = 'login') => {
+    setAuthModalMode(mode);
+    setIsAuthModalOpen(true);
+  };
 
   // Initialize session or default business
   useEffect(() => {
@@ -132,32 +142,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const enterDemo = async () => {
-    try {
-      const res = await api.auth.login('demo@nexora.local', 'owner');
-      localStorage.setItem('nexora_token', res.token);
-      setCurrentUser(res.user);
-      setActiveBusiness(res.business);
-      setCurrentView('dashboard');
-    } catch (err) {
-      console.error('Login failed, setting local demo session', err);
-      // Fallback
-      setCurrentUser({
-        id: 'usr_sarah_owner',
-        name: 'Sarah Jenkins',
-        email: 'demo@nexora.local',
-        role: 'owner',
-        businessId: 'biz_nexora_labs',
-        title: 'Founder & CEO',
-        joinedAt: '2025-01-10T09:00:00Z',
-      });
-      setCurrentView('dashboard');
-    }
-  };
-
   const logout = () => {
     localStorage.removeItem('nexora_token');
+    localStorage.removeItem('nexora_user_role');
     setCurrentUser(null);
+    setActiveBusiness(null);
     setCurrentView('landing');
   };
 
@@ -180,10 +169,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         refreshNotifications,
         isCommandPaletteOpen,
         setIsCommandPaletteOpen,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
+        authModalMode,
+        openAuthModal,
         theme,
         toggleTheme,
         setUserRole,
-        enterDemo,
         logout,
         refreshDataTrigger,
         triggerRefresh,

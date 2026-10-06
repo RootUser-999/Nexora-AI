@@ -30,7 +30,7 @@ export function TasksPage() {
     description: '',
     status: 'todo' as Task['status'],
     priority: 'medium' as Task['priority'],
-    assignedToName: 'Sarah Jenkins',
+    assignedToName: currentUser?.name || 'Administrator',
     dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
     labels: 'Operations, CRM'
   });
@@ -64,7 +64,7 @@ export function TasksPage() {
         description: '',
         status: 'todo',
         priority: 'medium',
-        assignedToName: 'Sarah Jenkins',
+        assignedToName: currentUser?.name || 'Administrator',
         dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
         labels: 'Operations, CRM'
       });
