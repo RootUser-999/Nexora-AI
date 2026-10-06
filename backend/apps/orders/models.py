@@ -1,7 +1,8 @@
 from django.db import models
 import uuid
+from apps.businesses.models import TenantAwareModel
 
-class Order(models.Model):
+class Order(TenantAwareModel):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('processing', 'Processing'),
@@ -11,7 +12,6 @@ class Order(models.Model):
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order_number = models.CharField(max_length=50, unique=True)
-    business = models.ForeignKey('businesses.Business', on_delete=models.CASCADE, related_name='orders')
     customer = models.ForeignKey('customers.Customer', on_delete=models.CASCADE, related_name='orders')
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)

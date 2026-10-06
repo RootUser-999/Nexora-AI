@@ -1,14 +1,14 @@
 from django.db import models
 import uuid
+from apps.businesses.models import TenantAwareModel
 
-class Customer(models.Model):
+class Customer(TenantAwareModel):
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         ('lead', 'Lead'),
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    business = models.ForeignKey('businesses.Business', on_delete=models.CASCADE, related_name='customers')
     name = models.CharField(max_length=255)
     email = models.EmailField()
     phone = models.CharField(max_length=50, blank=True)

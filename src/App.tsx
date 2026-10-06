@@ -1,8 +1,85 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import React from 'react';
+import { AppProvider, useApp } from './context/AppContext.tsx';
+import { AppShell } from './components/AppShell.tsx';
+import { CommandPalette } from './components/CommandPalette.tsx';
+import { LandingPage } from './pages/LandingPage.tsx';
+import { DashboardPage } from './pages/DashboardPage.tsx';
+import { AIAssistantPage } from './pages/AIAssistantPage.tsx';
+import { CustomersPage } from './pages/CustomersPage.tsx';
+import { ProductsPage } from './pages/ProductsPage.tsx';
+import { InventoryPage } from './pages/InventoryPage.tsx';
+import { OrdersPage } from './pages/OrdersPage.tsx';
+import { InvoicesPage } from './pages/InvoicesPage.tsx';
+import { TasksPage } from './pages/TasksPage.tsx';
+import { AnalyticsPage } from './pages/AnalyticsPage.tsx';
+import { ReportsPage } from './pages/ReportsPage.tsx';
+import { TeamPage } from './pages/TeamPage.tsx';
+import { AuditPage } from './pages/AuditPage.tsx';
+import { SettingsPage } from './pages/SettingsPage.tsx';
+import { DocsPage } from './pages/DocsPage.tsx';
+
+function MainRouter() {
+  const { currentView } = useApp();
+
+  if (currentView === 'landing') {
+    return (
+      <>
+        <LandingPage />
+        <CommandPalette />
+      </>
+    );
+  }
+
+  const renderActiveView = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return <DashboardPage />;
+      case 'ai-assistant':
+        return <AIAssistantPage />;
+      case 'customers':
+        return <CustomersPage />;
+      case 'products':
+        return <ProductsPage />;
+      case 'inventory':
+        return <InventoryPage />;
+      case 'orders':
+        return <OrdersPage />;
+      case 'invoices':
+        return <InvoicesPage />;
+      case 'tasks':
+        return <TasksPage />;
+      case 'analytics':
+        return <AnalyticsPage />;
+      case 'reports':
+        return <ReportsPage />;
+      case 'team':
+        return <TeamPage />;
+      case 'audit':
+        return <AuditPage />;
+      case 'settings':
+        return <SettingsPage />;
+      case 'docs':
+        return <DocsPage />;
+      default:
+        return <DashboardPage />;
+    }
+  };
+
+  return (
+    <>
+      <AppShell>
+        {renderActiveView()}
+      </AppShell>
+      <CommandPalette />
+    </>
+  );
+}
 
 export default function App() {
-  return <div></div>;
+  return (
+    <AppProvider>
+      <MainRouter />
+    </AppProvider>
+  );
 }
+

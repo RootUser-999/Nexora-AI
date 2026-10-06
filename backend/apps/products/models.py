@@ -1,14 +1,14 @@
 from django.db import models
 import uuid
+from apps.businesses.models import TenantAwareModel
 
-class Product(models.Model):
+class Product(TenantAwareModel):
     STATUS_CHOICES = [
         ('in_stock', 'In Stock'),
         ('low_stock', 'Low Stock'),
         ('out_of_stock', 'Out of Stock'),
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    business = models.ForeignKey('businesses.Business', on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255)
     sku = models.CharField(max_length=100)
     category = models.CharField(max_length=100)

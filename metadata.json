@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "Nexora AI — AI-Powered Business Management SaaS",
+  "description": "Enterprise-grade AI-powered business management platform for SMEs with CRM, inventory, orders, automated invoices, analytics, and intelligent business assistant.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
